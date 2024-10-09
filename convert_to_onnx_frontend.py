@@ -16,23 +16,26 @@ if __name__ == '__main__':
 
     waveform_for_torch, sr = torchaudio.load(args.wav, normalize=True)
 
-    pt_model = custom_yamnet_model.ModelE2E()
+    pt_model = custom_yamnet_model.ModelFrontend()
 
     with torch.no_grad():
         pt_model.eval()
 
+        # export_options = torch.onnx.ExportOptions(dynamic_shapes=True)
+        # onnx_program = torch.onnx.dynamo_export(pt_model, waveform_for_torch, export_options=export_options)
+        # onnx_program.save('yamnet_frontend.onnx')
         torch.onnx.export(pt_model,               # model being run
                 waveform_for_torch,                         # model input (or a tuple for multiple inputs)
-                'yamnet_e2e.onnx',            # where to save the model (can be a file or file-like object)
+                'yamnet_frontend.onnx',            # where to save the model (can be a file or file-like object)
                 verbose=False,
                 input_names=['input'],
                 output_names=['output'],
                 dynamic_axes={'input' : {1 : 'input_length'},
                               'output' : {0: 'output_length'}})
 
-        ov_model = ov.convert_model('yamnet_e2e.onnx',
+        ov_model = ov.convert_model('yamnet_frontend.onnx',
                                     verbose=True,
                                     share_weights=False,
                                     input=[1, -1])
                     
-        ov.save_model(ov_model, 'yamnet_e2e.xml', compress_to_fp16=True)
+        ov.save_model(ov_model, 'yamnet_frontend.xml', compress_to_fp16=True)

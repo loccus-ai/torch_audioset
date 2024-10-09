@@ -1,6 +1,13 @@
 .vscode/
 exp/
 tools/output
+.venv*
+
+*.pth
+*.bin
+*.xml
+*.onnx
+*.pt
 
 build/
 dist/
